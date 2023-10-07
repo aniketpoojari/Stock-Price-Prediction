@@ -1,0 +1,13 @@
+pandas
+yfinance
+seaborn
+statsmodels
+xgboost
+scikit-learn
+torch
+torchvision
+torchaudio
+tdqm
+dvc
+mlflow
+psycopg2

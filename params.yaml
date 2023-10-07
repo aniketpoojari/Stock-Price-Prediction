@@ -1,0 +1,52 @@
+base:
+  project: Stock-Price-Prediction
+  target_column: Close
+
+get_data:
+  raw_data_csv: data/raw/raw_data.csv
+  symbol: AAPL
+  start: "2017-01-01"
+
+feature_engineering:
+  feature_engineering_data_csv: data/feature_engineering/feature_engineering_data.csv
+
+feature_selection:
+  feature_selection_data_csv: data/feature_selection/feature_selection_data.csv
+  peek: 1
+  split: 0.8
+  gamma: 0.0 
+  n_estimators: 400
+  base_score: 0.7
+  learning_rate: 0.05
+  threshold: 0.02
+
+batch_data_maker:
+  batch_training_x_data_pt: data/batch_data_maker/batch_training_x_data.pt
+  batch_training_y_data_pt: data/batch_data_maker/batch_training_y_data.pt
+  batch_validation_x_data_pt: data/batch_data_maker/batch_validation_x_data.pt
+  batch_validation_y_data_pt: data/batch_data_maker/batch_validation_y_data.pt
+  pred_data_pt: data/batch_data_maker/pred_data.pt
+  split: 0.8
+  peek: 3
+  lookback: 100
+
+split_data:
+  train_path: data/splitted/train_price.csv
+  test_path: data/splitted/test_price.csv
+  test_size: 0.2
+
+training:
+  first_layer_size: [30]
+  epochs: [50]
+  kernel_size: [11]
+  learning_rate: [0.01]
+
+mlflow_config:
+  artifacts_dir: artifacts
+  experiment_name: CNN regression 10
+  run_name: mlops
+  registered_model_name: CNNStockModel
+  experiment_ids: 7
+  remote_server_uri: http://localhost:5000
+
+webapp_model_dir: saved_models/model.pth

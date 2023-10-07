@@ -1,0 +1,67 @@
+stages:
+  get_data:
+    cmd: python src/get_data.py --config=params.yaml
+    deps:
+    - src/get_data.py
+    params:
+    - get_data.symbol
+    - get_data.start
+    outs:
+    - data/raw/raw_data.csv
+  feature_engineering:
+    cmd: python src/feature_engineering.py --config=params.yaml
+    deps:
+    - data/raw/raw_data.csv
+    - src/feature_engineering.py
+    outs:
+    - data/feature_engineering/feature_engineering_data.csv
+  feature_selection:
+    cmd: python src/feature_selection.py --config=params.yaml
+    deps:
+    - data/feature_engineering/feature_engineering_data.csv
+    - src/feature_selection.py
+    params:
+    - feature_selection.split
+    - feature_selection.gamma
+    - feature_selection.n_estimators
+    - feature_selection.base_score
+    - feature_selection.learning_rate
+    - feature_selection.threshold
+    outs:
+    - data/feature_selection/feature_selection_data.csv
+  batch_data_maker:
+    cmd: python src/batch_data_maker.py --config=params.yaml
+    deps:
+    - data/feature_selection/feature_selection_data.csv
+    - src/batch_data_maker.py
+    params:
+    - batch_data_maker.split
+    - batch_data_maker.peek
+    - batch_data_maker.lookback
+    outs:
+    - data/batch_data_maker/batch_training_x_data.pt
+    - data/batch_data_maker/batch_training_y_data.pt
+    - data/batch_data_maker/batch_validation_x_data.pt
+    - data/batch_data_maker/batch_validation_y_data.pt
+  training:
+    cmd: python src/training.py --config=params.yaml
+    deps:
+    - data/batch_data_maker/batch_training_x_data.pt
+    - data/batch_data_maker/batch_training_y_data.pt
+    - data/batch_data_maker/batch_validation_x_data.pt
+    - data/batch_data_maker/batch_validation_y_data.pt
+    - src/training.py
+    params:
+    - training.first_layer_size
+    - training.epochs
+    - training.kernel_size
+    - training.learning_rate
+    - mlflow_config.run_name
+    - mlflow_config.experiment_name
+    - mlflow_config.remote_server_uri
+  log_production_model:
+    cmd: python src/log_production_model.py --config=params.yaml
+    deps:
+    - src/log_production_model.py
+    params:
+    - mlflow_config.experiment_ids

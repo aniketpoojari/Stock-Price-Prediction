@@ -1,0 +1,152 @@
+schema: '2.0'
+stages:
+  get_data:
+    cmd: python src/get_data.py --config=params.yaml
+    deps:
+    - path: src/get_data.py
+      md5: de32c21b668b15f59676f716047343e7
+      size: 696
+    params:
+      params.yaml:
+        get_data.start: '2017-01-01'
+        get_data.symbol: AAPL
+    outs:
+    - path: data/raw/raw_data.csv
+      md5: 44459ae6c5d870d7b7f14ced17e4f712
+      size: 156405
+  feat_eng:
+    cmd: python src/feat_eng.py --config=params.yaml
+    deps:
+    - path: data/raw/price.csv
+      md5: 0f08b8163495dbc06a373b47420da372
+      size: 156214
+    - path: src/feat_eng.py
+      md5: 77898f186b7957958f39872fb3fb92e2
+      size: 3518
+    outs:
+    - path: data/feat_eng/feat_eng_data.csv
+      md5: 7cac5a81f68616b50a2cda4e72253a67
+      size: 716034
+  feat_sel:
+    cmd: python src/feature_selection.py --config=params.yaml
+    deps:
+    - path: data/feat_eng/feat_eng_data.csv
+      md5: 7cac5a81f68616b50a2cda4e72253a67
+      size: 716034
+    - path: src/feature_selection.py
+      md5: 4427c5f489135600c2ce637b108a85a8
+      size: 2450
+    params:
+      params.yaml:
+        feat_sel.base_score: 0.7
+        feat_sel.gamma: 0.0
+        feat_sel.learning_rate: 0.05
+        feat_sel.n_estimators: 300
+        feat_sel.split: 0.8
+        feat_sel.spread: 1
+        feat_sel.threshold: 0.02
+    outs:
+    - path: data/sel_cols/sel_cols_data.csv
+      md5: 3c4f82db3a4552b5e6136b62e8d16101
+      size: 289849
+  feature_engineering:
+    cmd: python src/feature_engineering.py --config=params.yaml
+    deps:
+    - path: data/raw/raw_data.csv
+      md5: 44459ae6c5d870d7b7f14ced17e4f712
+      size: 156405
+    - path: src/feature_engineering.py
+      md5: e902f8bfdd2e4a092caea99b7e7c579f
+      size: 3598
+    outs:
+    - path: data/feature_engineering/feature_engineering_data.csv
+      md5: 4f5c2b2f21086847f639c4c66d62de5a
+      size: 716675
+  feature_selection:
+    cmd: python src/feature_selection.py --config=params.yaml
+    deps:
+    - path: data/feature_engineering/feature_engineering_data.csv
+      md5: 4f5c2b2f21086847f639c4c66d62de5a
+      size: 716675
+    - path: src/feature_selection.py
+      md5: 94777e90ceaee70810912e84678fc475
+      size: 2853
+    params:
+      params.yaml:
+        feature_selection.base_score: 0.7
+        feature_selection.gamma: 0.0
+        feature_selection.learning_rate: 0.05
+        feature_selection.n_estimators: 400
+        feature_selection.split: 0.8
+        feature_selection.threshold: 0.02
+    outs:
+    - path: data/feature_selection/feature_selection_data.csv
+      md5: ae22a5497b28fa8ca136a973a8dbbd84
+      size: 290070
+  batch_data_maker:
+    cmd: python src/batch_data_maker.py --config=params.yaml
+    deps:
+    - path: data/feature_selection/feature_selection_data.csv
+      md5: ae22a5497b28fa8ca136a973a8dbbd84
+      size: 290070
+    - path: src/batch_data_maker.py
+      md5: 1654c1f2e70fb49671ea118d396f72bb
+      size: 4416
+    params:
+      params.yaml:
+        batch_data_maker.lookback: 100
+        batch_data_maker.peek: 3
+        batch_data_maker.split: 0.8
+    outs:
+    - path: data/batch_data_maker/batch_training_x_data.pt
+      md5: 37bb370e89607b42be6dde80306ab2e5
+      size: 4845547
+    - path: data/batch_data_maker/batch_training_y_data.pt
+      md5: 93e6bb3528dfc5a9870bd13ad2de94b9
+      size: 18859
+    - path: data/batch_data_maker/batch_validation_x_data.pt
+      md5: 450c052bd4ac1b1f35024becd1b39001
+      size: 963947
+    - path: data/batch_data_maker/batch_validation_y_data.pt
+      md5: 5070f762126781a0002dbc1c7151067e
+      size: 4331
+  training:
+    cmd: python src/training.py --config=params.yaml
+    deps:
+    - path: data/batch_data_maker/batch_training_x_data.pt
+      md5: 37bb370e89607b42be6dde80306ab2e5
+      size: 4845547
+    - path: data/batch_data_maker/batch_training_y_data.pt
+      md5: 93e6bb3528dfc5a9870bd13ad2de94b9
+      size: 18859
+    - path: data/batch_data_maker/batch_validation_x_data.pt
+      md5: 450c052bd4ac1b1f35024becd1b39001
+      size: 963947
+    - path: data/batch_data_maker/batch_validation_y_data.pt
+      md5: 5070f762126781a0002dbc1c7151067e
+      size: 4331
+    - path: src/training.py
+      md5: b8ea4b1ca0c2653f0c90e25e4d820e68
+      size: 5749
+    params:
+      params.yaml:
+        mlflow_config.experiment_name: CNN regression 10
+        mlflow_config.remote_server_uri: http://localhost:5000
+        mlflow_config.run_name: mlops
+        training.epochs:
+        - 50
+        training.first_layer_size:
+        - 30
+        training.kernel_size:
+        - 11
+        training.learning_rate:
+        - 0.01
+  log_production_model:
+    cmd: python src/log_production_model.py --config=params.yaml
+    deps:
+    - path: src/log_production_model.py
+      md5: ab2f965f0d73e981bfe927c094a2c052
+      size: 1665
+    params:
+      params.yaml:
+        mlflow_config.experiment_ids: 7
