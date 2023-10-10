@@ -15,4 +15,4 @@
 - saved_models folder will contain the final model after the pipeline is executed using MLFlow
 
 ## Requirements
-- Use ```pip install -r requirements.txt``` to install the reuirements
+- Use ```pip install -r requirements.txt``` to install the requirements
