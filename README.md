@@ -84,7 +84,7 @@ dvc repro
 
 ## 📈 Evaluation
 
-- R2 score is used to evaluate the model
+- Mean Squared Error is used to evaluate the model
 
 ## 🎉 Results
 
