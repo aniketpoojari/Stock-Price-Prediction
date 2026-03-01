@@ -1,57 +1,28 @@
-# 🚀 Project Name
+# Automated Stock Price Prediction System
 
-Stock Price prediction
+An end-to-end machine learning pipeline that predicts future stock prices by dynamically selecting the most relevant technical indicators and training a Convolutional Neural Network (CNN). 
 
-## Table of Contents
+Stock market data is inherently noisy. Instead of manually guessing which technical indicators (RSI, MACD, Moving Averages, etc.) work best for a specific stock, this system uses an **XGBoost-assisted feature selection** step to dynamically identify the strongest signals before feeding them into a deep learning model.
 
-- [Introduction](#introduction)
-- [Features](#features)
-- [Requirements](#requirements)
-- [Installation](#installation)
-- [Usage](#usage)
-- [Data](#data)
-- [Model Training](#model-training)
-- [Evaluation](#evaluation)
-- [Results](#results)
+## 🌟 Key Features
 
-## 📄 Introduction
+- **Dynamic Feature Selection**: Uses XGBoost feature importance to automatically select the best technical indicators for any given stock.
+- **CNN Forecasting**: Formulates time-series forecasting as a 1D Convolutional Neural Network problem using PyTorch.
+- **Automated Data Pipeline**: Pulls live historical data from the Yahoo Finance API (`yfinance`).
+- **MLOps Integration**: Fully orchestrated using **DVC** for data/pipeline versioning and **MLflow** for experiment tracking and model registry.
 
-It is difficult to predict the price of a stock in the future manually as it is difficult to go through all of the indicators and check which one works better for which stock and even then stock data is susceptible to randomness. Therefore, here I an developing a single system to predict the future price of any stock by dynamically selecting the best indicators and the best model for the stock.
+## 🛠️ Tech Stack
 
-In this project I have used CNN to predict future values of a stock using multiple stock data.
-
-## 🌟 Features
-
-- [Exploratory Data Analysis and Experiments](notebooks/Stock-Price-Prediction.ipynb)
-- [Data Collection](src/get_data.py)
-- [Feature Engineering](src/feature_engineering.py)
-- [Feature Selection](src/feature_selection.py)
-- [Training](src/training.py)
-- [Best Model Selection](src/log_production_model.py)
-
-## 🛠️ Requirements
-
-- pandas
-- yfinance
-- seaborn
-- statsmodels
-- xgboost
-- scikit-learn
-- torch
-- torchvision
-- torchaudio
-- tdqm
-- dvc
-- mlflow
-- psycopg2
+- **Deep Learning**: PyTorch (1D CNN)
+- **Feature Engineering**: Pandas, XGBoost
+- **MLOps**: DVC, MLflow
+- **Data Source**: Yahoo Finance API (`yfinance`)
 
 ## 🚚 Installation
 
 ```bash
 # Clone the repository
 git clone https://github.com/aniketpoojari/Stock-Price-Prediction.git
-
-# Change directory
 cd Stock-Price-Prediction
 
 # Install dependencies
@@ -60,33 +31,22 @@ pip install -r requirements.txt
 
 ## 🚀 Usage
 
-```python
-# Run mlflow server in the background before running the pipeline
-mlflow server --backend-store-uri sqlite:///mlflow.db --default-artifact-root ./artifacts --host 0.0.0.0
-
-# Change values in the params.yaml file
-
-# training
-dvc repro
-```
-
-## 📊 Data
-
-- Here we use Yahoo API to get stock data
-- Check [notebook](notebooks/Stock-Price-Prediction.ipynb) to look at all the _Exploratory Data Anlaysis_ and _Experimentations_ done.
-
-## 🤖 Model Training
+The entire training process is managed via DVC. Before running the pipeline, start the MLflow tracking server:
 
 ```bash
-# Train the model
+# Run mlflow server in the background
+mlflow server --backend-store-uri sqlite:///mlflow.db --default-artifact-root ./artifacts --host 0.0.0.0
+```
+
+Configure your parameters (stock ticker, dates, hyperparameters) in `params.yaml`, then run the pipeline:
+
+```bash
+# Execute the end-to-end pipeline (Data Download -> Engineering -> Selection -> Train -> Log)
 dvc repro
 ```
 
-## 📈 Evaluation
+## 📈 Evaluation & Results
 
-- Mean Squared Error is used to evaluate the model
-
-## 🎉 Results
-
-- Go to localhost:5000/ to look at results on MLflow server.
-- saved_models folder will contain the final model after the pipeline is executed using MLFlow
+- The model uses **Mean Squared Error (MSE)** as its primary evaluation metric.
+- Navigate to `http://localhost:5000/` to view the MLflow dashboard, compare experiments, and analyze training loss curves.
+- The best-performing model is automatically exported and saved in the `saved_models` directory by the `log_production_model.py` script.

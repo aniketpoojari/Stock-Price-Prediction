@@ -150,6 +150,8 @@ def training(config_path):
             mlflow.log_metric("train_loss", t)
             mlflow.log_metric("val_loss", v)
 
+            print(type(model))
+
             tracking_url_type_store = urlparse(mlflow.get_artifact_uri()).scheme
 
             if tracking_url_type_store != "file":
